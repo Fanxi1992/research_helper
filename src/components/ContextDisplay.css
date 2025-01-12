@@ -1,0 +1,20 @@
+.context-display {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.context-display h2 {
+  margin-bottom: 10px;
+}
+
+.context-content {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.context-content p {
+  margin-bottom: 5px;
+}
+
