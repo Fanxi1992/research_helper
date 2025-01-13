@@ -23,6 +23,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onContextUpdate }) => {
   const [messages, setMessages] = useState<Message[]>([]); // 存储聊天消息历史
   const [input, setInput] = useState('');                  // 存储输入框的值
   const [isLoading, setIsLoading] = useState(false);       // 标记是否正在加载
+  const [selectedModel, setSelectedModel] = useState('google/gemini-2.0-flash-thinking-exp:free'); // 添加这一行
   // 使用useRef创建对消息列表末尾的引用,用于自动滚动
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -50,7 +51,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onContextUpdate }) => {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer 23422' // 认证token
         },
-        body: JSON.stringify({ query: input }) // 发送用户输入
+        body: JSON.stringify({ query: input, model: selectedModel }) // 发送用户输入和选择的模型
       });
 
       // 检查响应状态
@@ -85,25 +86,22 @@ const ChatBot: React.FC<ChatBotProps> = ({ onContextUpdate }) => {
             const jsonStr = line.slice(5); // 移除 'data: ' 前缀
             const parsedData = JSON.parse(jsonStr);
 
+            // 根据event类型处理不同的数据
             if (parsedData.event === 'cmpl') {
-              // 判断是否是上下文更新数据
-              if (typeof parsedData.text === 'object' && 
-                  parsedData.text.baihuawen && 
-                  parsedData.text.original_text) {
-                // 调用父组件传入的onContextUpdate更新上下文显示
-                onContextUpdate(
-                  parsedData.text.baihuawen,
-                  parsedData.text.original_text
-                );
-              } else if (typeof parsedData.text === 'string') {
-                // 更新机器人的回复消息
-                botResponse += parsedData.text;
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  newMessages[newMessages.length - 1].content = botResponse;
-                  return newMessages;
-                });
-              }
+              // 处理大模型的回答内容
+              botResponse += parsedData.text;
+              setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1].content = botResponse;
+                return newMessages;
+              });
+            } else if (parsedData.event === 'data_source') {
+              // 处理数据源文本,更新上下文显示
+              const contextData = JSON.parse(parsedData.text);
+              onContextUpdate(
+                contextData.baihuawen,
+                contextData.original_text
+              );
             }
           } catch (parseError) {
             console.error('解析 JSON 出错:', parseError, '行:', line);
@@ -149,12 +147,23 @@ const ChatBot: React.FC<ChatBotProps> = ({ onContextUpdate }) => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message here..."
+          placeholder="在此输入消息..."
           disabled={isLoading}
         />
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Sending...' : 'Send'}
+          {isLoading ? '发送中...' : '发送'}
         </button>
+        {/* 添加模型选择下拉框 */}
+        <select 
+          value={selectedModel} 
+          onChange={(e) => setSelectedModel(e.target.value)}
+          disabled={isLoading}
+        >
+          <option value="google/gemini-2.0-flash-thinking-exp:free">google/gemini-2.0-flash-thinking-exp:free</option>
+          <option value="google/gemini-2.0-flash-exp:free">google/gemini-2.0-flash-exp:free</option>
+          <option value="google/gemini-exp-1206:free">google/gemini-exp-1206:free</option>
+          <option value="google/gemini-pro-1.5">google/gemini-pro-1.5</option>
+        </select>
       </form>
     </div>
   );

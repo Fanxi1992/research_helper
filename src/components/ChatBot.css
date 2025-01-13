@@ -14,6 +14,9 @@
   margin-bottom: 10px;
   padding: 10px;
   border-radius: 5px;
+
+  white-space: pre-wrap; /* 保留换行符并支持自动换行 */
+  word-break: break-word; /* 长单词在需要时换行 */
 }
 
 .user {
