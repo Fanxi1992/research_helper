@@ -1,20 +1,22 @@
 .context-display {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.context-display h2 {
-  margin-bottom: 10px;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin: 1rem 0;
 }
 
 .context-content {
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
-.context-content p {
-  margin-bottom: 5px;
+.context-item {
+  padding: 0.5rem 0;
+}
+
+.context-item hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 0.5rem 0;
 }
 
